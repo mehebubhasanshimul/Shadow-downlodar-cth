@@ -1,6 +1,6 @@
 // api/download.js
 export default async function handler(req, res) {
-    // CORS Header সেট করা (ফ্রন্টএন্ড থেকে রিকোয়েস্ট এক্সেস করার জন্য)
+    // CORS Header সেটিংস (ফ্রন্টএন্ডের সাথে কানেক্ট করার জন্য)
     res.setHeader('Access-Control-Allow-Credentials', true);
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
@@ -11,48 +11,49 @@ export default async function handler(req, res) {
         return;
     }
 
+    // ফ্রন্টএন্ড থেকে আসা ভিডিও লিংক (?url=https://tiktok.com/...)
     const { url } = req.query;
 
     if (!url) {
-        return res.status(400).json({ status: "error", detail: "ভিডিও ইউআরএল দেওয়া হয়নি।" });
+        return res.status(400).json({ status: "error", detail: "অনুগ্রহ করে একটি টিকটক ভিডিও লিংক পেস্ট করুন।" });
     }
 
     try {
-        // নোট: RapidAPI-তে নির্দিষ্ট ভিডিও ডাউনলোডের জন্য সাধারণত ইউআরএল প্যাস করতে হয়।
-        // আপনার দেওয়া cURL-এর এন্ডপয়েন্টটি (user/khaby.lame) প্রোফাইল ডাটার জন্য ছিল।
-        // নিচে ভিডিও ডাউনলোডের স্ট্যান্ডার্ড এন্ডপয়েন্টে রিকোয়েস্ট পাঠানো হচ্ছে:
-        const targetApiUrl = `https://tiktok-video-downloader-api.p.rapidapi.com/dl?url=${encodeURIComponent(url)}`;
+        // 🚀 এটিই হলো আপনার এপিআই প্রোভাইডারের মূল ভিডিও অ্যানালাইসিস/ডাউনলোড এন্ডপয়েন্ট
+        const targetApiUrl = `https://tiktok-video-no-watermark2.p.rapidapi.com/?url=${encodeURIComponent(url)}&hd=1`;
 
         const response = await fetch(targetApiUrl, {
             method: 'GET',
             headers: {
-                'Content-Type': 'application/json',
-                'x-rapidapi-host': 'tiktok-video-downloader-api.p.rapidapi.com',
-                'x-rapidapi-key': 'b3ad11e41cmshb18121f061df58ep1b5c61jsnd7a63dda9d56' // আপনার প্রদত্ত কি
+                'x-rapidapi-key': 'b3ad11e41cmshb18121f061df58ep1b5c61jsnd7a63dda9d56', // আপনার দেওয়া কি
+                'x-rapidapi-host': 'tiktok-video-no-watermark2.p.rapidapi.com',
+                'Content-Type': 'application/json'
             }
         });
 
         if (!response.ok) {
-            throw new Error(`RapidAPI responded with status: ${response.status}`);
+            throw new Error(`RapidAPI Error Status: ${response.status}`);
         }
 
-        const data = await response.json();
+        const result = await response.json();
 
-        // এপিআই-এর রেসপন্স ফরম্যাট অনুযায়ী ডাটা ম্যাপ করা
-        if (data && (data.video || data.download_urls)) {
-            // আপনার এপিআই-এর সঠিক রেসপন্স কী (Key) অনুযায়ী নিচের লাইনগুলো কিছুটা পরিবর্তন হতে পারে
-            const directVideoLink = data.video || (data.download_urls && data.download_urls[0]) || "";
-            const videoTitle = data.title || data.description || "TikTok Video";
+        // এপিআই-এর ডাটা স্ট্রাকচার (data.data.play বা data.data.hdplay) অনুযায়ী রেসপন্স পাঠানো
+        if (result && result.data) {
+            // ওয়াটারমার্ক ছাড়া ভিডিওর আসল প্লে-লিংক
+            const directLink = result.data.play || result.data.hdplay || result.data.wmplay || "";
+            const title = result.data.title || "TikTok Video By Shadow Joker";
 
-            return res.status(200).json({
-                status: "success",
-                title: videoTitle,
-                platform: "TikTok",
-                download_link: directVideoLink
-            });
-        } else {
-            return res.status(422).json({ status: "error", detail: "ভিডিও স্ট্রিম লিঙ্ক খুঁজে পাওয়া যায়নি।" });
+            if (directLink) {
+                return res.status(200).json({
+                    status: "success",
+                    title: title,
+                    platform: "TikTok",
+                    download_link: directLink // এই লিংকটিই ফ্রন্টএন্ডে "Save File" বাটনে কাজ করবে
+                });
+            }
         }
+
+        return res.status(422).json({ status: "error", detail: "এপিআই কোনো সরাসরি ডাউনলোড লিংক জেনারেট করতে পারেনি।" });
 
     } catch (error) {
         return res.status(500).json({ status: "error", detail: error.message });
