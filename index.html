@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>SHADOW DOWNLOADER PRO</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0b0f;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 12px;
+        }
+        .phone {
+            width: 393px;
+            max-width: 100%;
+            background: #12131a;
+            border-radius: 40px;
+            border: 1px solid #2a2b32;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.8);
+            overflow: hidden;
+            position: relative;
+        }
+        .status-bar { display: flex; justify-content: space-between; padding: 14px 24px 8px; color: #e8eaed; font-size: 12px; font-weight: 600; }
+        .notch { width: 140px; height: 30px; background: #0a0b0f; border-radius: 0 0 18px 18px; margin: 0 auto; top: -2px; position: relative; }
+        .app-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 20px 16px; }
+        .app-header .left { display: flex; align-items: center; gap: 12px; }
+        .app-icon { width: 42px; height: 42px; background: linear-gradient(135deg, #6c5ce7, #a29bfe, #fd79a8); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 18px; color: #fff; box-shadow: 0 4px 15px rgba(108,92,231,0.4); }
+        .app-name { font-size: 18px; font-weight: 800; color: #e8eaed; letter-spacing: -0.3px; }
+        .app-name span { background: linear-gradient(135deg, #a29bfe, #fd79a8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .app-sub { font-size: 11px; color: #6b7280; font-weight: 400; margin-top: -2px; }
+        .header-right { display: flex; gap: 12px; }
+        .header-right div { width: 36px; height: 36px; background: #1e1f27; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; transition: 0.2s; }
+        .header-right div:hover { background: #2a2b35; }
+
+        .perm-banner {
+            margin: 4px 16px 16px;
+            padding: 14px 16px;
+            background: linear-gradient(135deg, #1a1b26, #1e1f2e);
+            border-radius: 16px;
+            border: 1px solid #2a2b3a;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .perm-banner .perm-icon { width: 40px; height: 40px; background: #2d1f3d; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .perm-banner .perm-text { flex: 1; font-size: 13px; color: #c4c7ce; }
+        .perm-banner .perm-text strong { color: #e8eaed; }
+        .perm-banner .perm-btn { background: linear-gradient(135deg, #6c5ce7, #a29bfe); border: none; color: #fff; padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; white-space: nowrap; }
+        .perm-banner .perm-btn:hover { opacity: 0.9; }
+        .perm-banner .perm-btn.granted { background: #1a3a2a; color: #34d399; }
+
+        .search-box { margin: 0 16px 16px; display: flex; gap: 8px; }
+        .search-box input { flex: 1; padding: 14px 16px; background: #1a1b24; border: 1px solid #2a2b36; border-radius: 14px; color: #e8eaed; font-size: 14px; outline: none; transition: 0.2s; }
+        .search-box input:focus { border-color: #6c5ce7; }
+        .search-box input::placeholder { color: #4b4f5c; }
+        .search-box button {
+            width: 50px; height: 50px;
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            border: none; border-radius: 14px; color: #fff;
+            font-size: 20px; cursor: pointer; transition: 0.2s;
+        }
+        .search-box button:hover { opacity: 0.9; }
+        .search-box button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .section-title { display: flex; justify-content: space-between; padding: 4px 20px 12px; font-size: 15px; font-weight: 700; color: #e8eaed; }
+        .section-title span { color: #6b7280; font-weight: 400; font-size: 13px; }
+        .platform-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 0 16px 20px; }
+        .platform-item {
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
+            padding: 16px 8px; background: #1a1b24; border-radius: 16px;
+            border: 1px solid transparent; cursor: pointer; transition: 0.25s;
+        }
+        .platform-item:hover { border-color: #6c5ce7; background: #1e1f2e; transform: translateY(-2px); }
+        .platform-item .p-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .platform-item .p-name { font-size: 11px; font-weight: 600; color: #9ca3af; text-align: center; }
+        .platform-item .p-badge { font-size: 8px; background: #2d1f3d; color: #a29bfe; padding: 2px 6px; border-radius: 4px; margin-top: -4px; }
+
+        .recent-section { padding: 0 16px 20px; min-height: 80px; }
+        .recent-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 14px; background: #1a1b24; border-radius: 14px;
+            margin-bottom: 8px; border: 1px solid transparent; transition: 0.2s;
+        }
+        .recent-item:hover { border-color: #2a2b3a; }
+        .recent-item .r-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+        .recent-item .r-info { flex: 1; min-width: 0; }
+        .recent-item .r-title { font-size: 13px; font-weight: 600; color: #e8eaed; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .recent-item .r-meta { font-size: 11px; color: #6b7280; margin-top: 2px; }
+        .recent-item .r-action-btn { background: #6c5ce7; border: none; color: white; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer; text-decoration: none; }
+
+        .bottom-nav { display: flex; justify-content: space-around; padding: 12px 16px 24px; background: #0f1017; border-top: 1px solid #1e1f28; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 10px; color: #6b7280; cursor: pointer; transition: 0.2s; padding: 4px 12px; }
+        .nav-item.active { color: #a29bfe; }
+        .nav-item .nav-icon { font-size: 20px; line-height: 1; }
+
+        .modal-overlay {
+            position: absolute; inset: 0;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+            display: none; align-items: center; justify-content: center;
+            z-index: 100; border-radius: 40px;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal {
+            background: #1a1b24; border: 1px solid #2a2b3a;
+            border-radius: 24px; padding: 24px; width: 320px; max-width: 90%; text-align: center;
+        }
+        .modal .m-icon { font-size: 48px; margin-bottom: 12px; }
+        .modal h3 { color: #e8eaed; font-size: 20px; margin-bottom: 8px; }
+        .modal p { color: #9ca3af; font-size: 14px; line-height: 1.5; margin-bottom: 20px; }
+        .modal .m-btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: 600; font-size: 15px; cursor: pointer; transition: 0.2s; margin-bottom: 8px; }
+        .modal .m-btn.primary { background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: #fff; }
+        .modal .m-btn.secondary { background: #2a2b36; color: #9ca3af; }
+        .modal .m-btn.danger { background: #3a1a1a; color: #f87171; }
+        .modal .m-btn:hover { opacity: 0.9; }
+        .modal .m-input { width: 100%; padding: 12px; background: #0d0e15; border: 1px solid #2a2b36; border-radius: 8px; color: #e8eaed; font-size: 13px; margin-bottom: 16px; font-family: monospace; }
+        .modal .m-input:focus { border-color: #6c5ce7; outline: none; }
+        .modal .auth-box {
+            background: #0d1a0d;
+            border: 1px solid #1a3a1a;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+            font-size: 12px;
+            color: #34d399;
+            line-height: 1.5;
+            text-align: left;
+        }
+        .modal .auth-box .check { color: #34d399; font-size: 16px; }
+        .modal .auth-box .label { color: #6b7280; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .toast {
+            position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%);
+            background: #1e1f2e; border: 1px solid #2a2b3a;
+            padding: 12px 20px; border-radius: 12px; font-size: 13px;
+            color: #e8eaed; display: none; z-index: 200;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5); white-space: nowrap;
+        }
+        .toast.show { display: block; animation: toastAnim 0.3s ease; }
+        @keyframes toastAnim { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+        .credit-text { text-align: center; font-size: 10px; color: #3a3b44; padding: 8px 0 4px; letter-spacing: 1px; }
+        .credit-text strong { color: #6b7280; }
+    </style>
+</head>
+<body>
+
+<div class="phone" id="app">
+    <!-- Status Bar -->
+    <div class="status-bar"><span>9:41</span><span>🔋 📶</span></div>
+    <div class="notch"></div>
+
+    <!-- App Header -->
+    <div class="app-header">
+        <div class="left">
+            <div class="app-icon">S</div>
+            <div>
+                <div class="app-name">SHADOW <span>DOWNLOADER</span></div>
+                <div class="app-sub" id="apiStatus">🟢 API: Cobalt Free Engine</div>
+            </div>
+        </div>
+        <div class="header-right">
+            <div onclick="openModal('apiModal')">🔑</div>
+            <div onclick="openModal('telegramModal')">✈️</div>
+        </div>
+    </div>
+
+    <!-- Permission Banner -->
+    <div class="perm-banner" id="permBanner">
+        <div class="perm-icon">📂</div>
+        <div class="perm-text">
+            <strong>Permissions Required</strong><br/>
+            Storage • Contacts • Device Info
+        </div>
+        <button class="perm-btn" id="permBtn" onclick="requestPermissions()">Grant All</button>
+    </div>
+
+    <!-- Search Box -->
+    <div class="search-box">
+        <input type="text" id="urlInput" placeholder="Paste video link (FB, TT, IG, YT)..." />
+        <button id="downloadBtn" onclick="handleDownload()">⬇</button>
+    </div>
+
+    <!-- Platform Grid -->
+    <div class="section-title">Supported Platforms <span>4 platforms</span></div>
+    <div class="platform-grid">
+        <div class="platform-item" onclick="setPlatform('facebook')">
+            <div class="p-icon" style="background:#1877f2;">📘</div>
+            <div class="p-name">Facebook</div>
+            <div class="p-badge">1080p</div>
+        </div>
+        <div class="platform-item" onclick="setPlatform('tiktok')">
+            <div class="p-icon" style="background:#000;border:1px solid #333;">🎵</div>
+            <div class="p-name">TikTok</div>
+            <div class="p-badge">HD</div>
+        </div>
+        <div class="platform-item" onclick="setPlatform('instagram')">
+            <div class="p-icon" style="background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);">📸</div>
+            <div class="p-name">Instagram</div>
+            <div class="p-badge">Reels</div>
+        </div>
+        <div class="platform-item" onclick="setPlatform('youtube')">
+            <div class="p-icon" style="background:#ff0000;">▶</div>
+            <div class="p-name">YouTube</div>
+            <div class="p-badge">4K</div>
+        </div>
+    </div>
+
+    <!-- Recent Downloads -->
+    <div class="section-title">Recent Downloads <span id="recentCount">0 items</span></div>
+    <div class="recent-section" id="recentList">
+        <div style="text-align:center;padding:24px;color:#4b4f5c;font-size:14px;">No downloads yet. Paste a link above!</div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <div class="nav-item active"><span class="nav-icon">🏠</span><span>Home</span></div>
+        <div class="nav-item" onclick="showToast('Downloads opened')"><span class="nav-icon">⬇️</span><span>Downloads</span></div>
+        <div class="nav-item" onclick="showToast('History')"><span class="nav-icon">🕐</span><span>History</span></div>
+        <div class="nav-item" onclick="showToast('Settings')"><span class="nav-icon">⚙️</span><span>Settings</span></div>
+    </div>
+
+    <!-- Credit -->
+    <div class="credit-text">DESIGNED BY <strong>SHADOW JOKER</strong> • v3.0</div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Permission Modal -->
+    <div class="modal-overlay show" id="permModal">
+        <div class="modal">
+            <div class="m-icon">🔒</div>
+            <h3>🔐 Security Authorization</h3>
+            <div class="auth-box">
+                <div class="label">✓ SYSTEM PERMISSION</div>
+                <span class="check">✔</span> App: SHADOW DOWNLOADER<br/>
+                <span class="check">✔</span> Target: Media Controller<br/>
+                <span class="check">✔</span> Purpose: Video Processing & Saving<br/>
+                <span class="check">✔</span> Scope: Storage, Network Access
+            </div>
+            <p>To process and save videos directly to your device gallery, please grant storage and network authorization rules.</p>
+            <button class="m-btn primary" onclick="grantPermissions()">✅ Allow & Continue</button>
+            <button class="m-btn danger" onclick="denyPermissions()">⛔ Deny & Exit</button>
+        </div>
+    </div>
+
+    <!-- API Config Modal -->
+    <div class="modal-overlay" id="apiModal">
+        <div class="modal">
+            <div class="m-icon">🔑</div>
+            <h3>⚙️ Engine Status</h3>
+            <p>Using Open-Source Cobalt API Server. No external tokens required for standard operations.</p>
+            <input class="m-input" id="tgBotTokenInput" placeholder="Optional Telegram Token (e.g. 123:ABC...)" />
+            <input class="m-input" id="tgChatIdInput" placeholder="Optional Telegram Chat ID" />
+            <button class="m-btn primary" onclick="saveApiConfig()">💾 Save Changes</button>
+            <button class="m-btn secondary" onclick="closeModal('apiModal')">Close</button>
+        </div>
+    </div>
+
+    <!-- Telegram Data Modal -->
+    <div class="modal-overlay" id="telegramModal">
+        <div class="modal">
+            <div class="m-icon">✈️</div>
+            <h3>📡 Session Activity Logs</h3>
+            <p id="telegramLog" style="font-size:11px;text-align:left;background:#0d0e15;padding:12px;border-radius:8px;font-family:monospace;max-height:200px;overflow-y:auto; color: #a29bfe;">No current logs.</p>
+            <button class="m-btn primary" onclick="closeModal('telegramModal')">OK</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Open Source API configuration (Using a public reliable Cobalt instance)
+const API_URL = "https://api.cobalt.tools/api/json";
+
+let permissionsGranted = false;
+let recentDownloads = [];
+let telegramLog = [];
+
+function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.innerText = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+function openModal(id) {
+    document.getElementById(id).classList.add('show');
+}
+
+function closeModal(id) {
+    document.getElementById(id).classList.remove('show');
+}
+
+function grantPermissions() {
+    permissionsGranted = true;
+    document.getElementById('permModal').classList.remove('show');
+    const btn = document.getElementById('permBtn');
+    btn.innerText = "Granted ✓";
+    btn.classList.add('granted');
+    btn.disabled = true;
+    logEvent("Permissions successfully granted by user.");
+    showToast("Permissions updated successfully!");
+}
+
+function denyPermissions() {
+    closeModal('permModal');
+    showToast("Permissions denied. Certain functions may fail.");
+}
+
+function setPlatform(platform) {
+    const input = document.getElementById('urlInput');
+    if(platform === 'facebook') input.value = "https://www.facebook.com/";
+    if(platform === 'tiktok') input.value = "https://www.tiktok.com/";
+    if(platform === 'instagram') input.value = "https://www.instagram.com/";
+    if(platform === 'youtube') input.value = "https://www.youtube.com/";
+    input.focus();
+}
+
+function logEvent(text) {
+    const timestamp = new Date().toLocaleTimeString();
+    telegramLog.push(`[${timestamp}] ${text}`);
+    const logEl = document.getElementById('telegramLog');
+    if(logEl) logEl.innerHTML = telegramLog.join("<br/>");
+}
+
+function saveApiConfig() {
+    closeModal('apiModal');
+    showToast("Settings updated locally.");
+}
+
+async function handleDownload() {
+    const urlInput = document.getElementById('urlInput');
+    const url = urlInput.value.trim();
+    const btn = document.getElementById('downloadBtn');
+
+    if(!url) {
+        showToast("Please enter a valid URL first!");
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerText = "⏳";
+    showToast("Processing video link...");
+    logEvent(`Initiating processing request for URL: ${url}`);
+
+    try {
+        // Calling the free open-source Cobalt API endpoint
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                url: url,
+                vQuality: '720', // Default optimization quality
+                isAudioOnly: false
+            })
+        });
+
+        const data = await response.json();
+
+        if (data && (data.url || data.picker)) {
+            let downloadLink = data.url;
+            
+            // Handle multiple streams or picker style if provided by engine
+            if (data.picker && data.picker.length > 0) {
+                downloadLink = data.picker[0].url;
+            }
+
+            showToast("Success! Video ready.");
+            logEvent(`Successfully fetched asset from API stream source.`);
+            
+            // Add to client side interface list
+            addRecentItem(url, downloadLink);
+            urlInput.value = "";
+        } else {
+            throw new Error(data.text || "Could not find valid media link stream.");
+        }
+
+    } catch (error) {
+        console.error(error);
+        showToast("Failed to parse link. Try another link.");
+        logEvent(`Error parsing requested resource: ${error.message}`);
+    } finally {
+        btn.disabled = false;
+        btn.innerText = "⬇";
+    }
+}
+
+function addRecentItem(originalUrl, directLink) {
+    const list = document.getElementById('recentList');
+    const countEl = document.getElementById('recentCount');
+    
+    // Clear fallback text if first item
+    if(recentDownloads.length === 0) {
+        list.innerHTML = "";
+    }
+
+    let domain = "Video File";
+    try {
+        domain = new URL(originalUrl).hostname.replace('www.', '');
+    } catch(e){}
+
+    recentDownloads.push({ url: originalUrl, link: directLink });
+    countEl.innerText = `${recentDownloads.length} items`;
+
+    const itemHtml = `
+        <div class="recent-item">
+            <div class="r-icon" style="background: #2a2b36;">🎬</div>
+            <div class="r-info">
+                <div class="r-title">${domain} Link</div>
+                <div class="r-meta">Ready to download asset</div>
+            </div>
+            <a href="${directLink}" target="_blank" class="r-action-btn">Save File</a>
+        </div>
+    `;
+    list.insertAdjacentHTML('afterbegin', itemHtml);
+}
+</script>
+</body>
+</html>
