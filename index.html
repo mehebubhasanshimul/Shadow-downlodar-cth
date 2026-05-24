@@ -157,7 +157,7 @@
             <div class="app-icon">S</div>
             <div>
                 <div class="app-name">SHADOW <span>DOWNLOADER</span></div>
-                <div class="app-sub" id="apiStatus">🔄 Connecting to Engine...</div>
+                <div class="app-sub" id="apiStatus">🟢 API: Vercel Edge Serverless</div>
             </div>
         </div>
         <div class="header-right">
@@ -241,7 +241,7 @@
         <div class="modal">
             <div class="m-icon">🔑</div>
             <h3>⚙️ Engine Status</h3>
-            <p id="engineModalStatus">Checking connection to Render API...</p>
+            <p id="engineModalStatus">Connected to Vercel Serverless Architecture (RapidAPI Route Active).</p>
             <input class="m-input" id="tgBotTokenInput" placeholder="Optional Telegram Token (e.g. 123:ABC...)" />
             <input class="m-input" id="tgChatIdInput" placeholder="Optional Telegram Chat ID" />
             <button class="m-btn primary" onclick="saveApiConfig()">💾 Save Changes</button>
@@ -260,9 +260,8 @@
 </div>
 
 <script>
-// রেন্ডার বেস ও ডাউনলোড এপিআই ইউআরএল
-const RENDER_BASE_URL = "https://video-download-api-bwf4.onrender.com";
-const API_URL = `${RENDER_BASE_URL}/api/download`;
+// ভের্সেল লোকাল এবং প্রোডাকশন ইন্টারনাল এপিআই রাউট ম্যাপ
+const API_URL = "/api/download";
 
 let permissionsGranted = false;
 let recentDownloads = [];
@@ -318,30 +317,8 @@ function saveApiConfig() {
     showToast("Settings updated locally.");
 }
 
-// 🚀 RENDER AUTO-LIVE (KEEP-ALIVE PINGER) SYSTEM
-async function wakeUpRenderEngine() {
-    logEvent("Triggering auto-wake signal to Render Engine...");
-    try {
-        // রেন্ডারের রুট ইউআরএল (/) এ একটি হালকা রিকোয়েস্ট পাঠানো হচ্ছে
-        const response = await fetch(RENDER_BASE_URL, { method: 'GET' });
-        if(response.ok) {
-            document.getElementById('apiStatus').innerText = "🟢 API: Shadow Universal Engine";
-            document.getElementById('engineModalStatus').innerText = "Connected to Shadow Custom Render API Engine (Active).";
-            logEvent("Render Engine responds: Active & Standby.");
-        }
-    } catch (error) {
-        console.error("Wake-up ping failed:", error);
-        document.getElementById('apiStatus').innerText = "🔴 API: Engine Disconnected";
-        logEvent("Warning: Render Engine cold start sequence delayed.");
-    }
-}
-
-// সাইট ওপেন হওয়ামাত্রই সার্ভারকে জাগানোর জন্য কল হবে
-wakeUpRenderEngine();
-
-// সার্ভারকে সচল রাখতে প্রতি ৪ মিনিটে (২৪০০০০ মিলিমেকেন্ড) একবার অটোমেটিক ব্যাকগ্রাউন্ড পিং করবে
-setInterval(wakeUpRenderEngine, 240000);
-
+// ইনিশিয়াল বুট লগ (ভের্সেলের জন্য কোল্ড স্টার্ট পিন্জারের প্রয়োজন নেই)
+logEvent("Vercel Serverless Network Init: Core System Standby.");
 
 async function handleDownload() {
     const urlInput = document.getElementById('urlInput');
@@ -356,7 +333,7 @@ async function handleDownload() {
     btn.disabled = true;
     btn.innerText = "⏳";
     showToast("Processing video link...");
-    logEvent(`Initiating processing request for URL: ${url}`);
+    logEvent(`Sending stream parse request to Vercel Endpoint for URL: ${url}`);
 
     try {
         const targetUrl = `${API_URL}?url=${encodeURIComponent(url)}`;
@@ -369,7 +346,7 @@ async function handleDownload() {
 
         if (data && data.status === "success" && data.download_link) {
             showToast("Success! Video ready.");
-            logEvent(`Successfully fetched asset from Render API stream source.`);
+            logEvent(`Successfully fetched asset from Vercel Serverless -> RapidAPI stream.`);
             
             addRecentItem(url, data.download_link, data.title, data.platform);
             urlInput.value = "";
