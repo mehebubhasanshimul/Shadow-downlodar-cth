@@ -157,7 +157,7 @@
             <div class="app-icon">S</div>
             <div>
                 <div class="app-name">SHADOW <span>DOWNLOADER</span></div>
-                <div class="app-sub" id="apiStatus">🟢 API: Shadow Universal Engine</div>
+                <div class="app-sub" id="apiStatus">🔄 Connecting to Engine...</div>
             </div>
         </div>
         <div class="header-right">
@@ -241,7 +241,7 @@
         <div class="modal">
             <div class="m-icon">🔑</div>
             <h3>⚙️ Engine Status</h3>
-            <p>Connected to Shadow Custom Render API Engine.</p>
+            <p id="engineModalStatus">Checking connection to Render API...</p>
             <input class="m-input" id="tgBotTokenInput" placeholder="Optional Telegram Token (e.g. 123:ABC...)" />
             <input class="m-input" id="tgChatIdInput" placeholder="Optional Telegram Chat ID" />
             <button class="m-btn primary" onclick="saveApiConfig()">💾 Save Changes</button>
@@ -260,8 +260,9 @@
 </div>
 
 <script>
-// আপনার নতুন রেন্ডার এপিআই ইউআরএল সেট করা হলো
-const API_URL = "https://video-download-api-bwf4.onrender.com/api/download";
+// রেন্ডার বেস ও ডাউনলোড এপিআই ইউআরএল
+const RENDER_BASE_URL = "https://video-download-api-bwf4.onrender.com";
+const API_URL = `${RENDER_BASE_URL}/api/download`;
 
 let permissionsGranted = false;
 let recentDownloads = [];
@@ -298,7 +299,6 @@ function denyPermissions() {
     showToast("Permissions denied. Certain functions may fail.");
 }
 
-// প্ল্যাটফর্মে ক্লিক করলে ইনপুট ফিল্ড খালি থাকবে এবং এক্সট্রা কোনো লিঙ্ক দেখাবে না
 function setPlatform(platform) {
     const input = document.getElementById('urlInput');
     input.value = ""; 
@@ -318,6 +318,31 @@ function saveApiConfig() {
     showToast("Settings updated locally.");
 }
 
+// 🚀 RENDER AUTO-LIVE (KEEP-ALIVE PINGER) SYSTEM
+async function wakeUpRenderEngine() {
+    logEvent("Triggering auto-wake signal to Render Engine...");
+    try {
+        // রেন্ডারের রুট ইউআরএল (/) এ একটি হালকা রিকোয়েস্ট পাঠানো হচ্ছে
+        const response = await fetch(RENDER_BASE_URL, { method: 'GET' });
+        if(response.ok) {
+            document.getElementById('apiStatus').innerText = "🟢 API: Shadow Universal Engine";
+            document.getElementById('engineModalStatus').innerText = "Connected to Shadow Custom Render API Engine (Active).";
+            logEvent("Render Engine responds: Active & Standby.");
+        }
+    } catch (error) {
+        console.error("Wake-up ping failed:", error);
+        document.getElementById('apiStatus').innerText = "🔴 API: Engine Disconnected";
+        logEvent("Warning: Render Engine cold start sequence delayed.");
+    }
+}
+
+// সাইট ওপেন হওয়ামাত্রই সার্ভারকে জাগানোর জন্য কল হবে
+wakeUpRenderEngine();
+
+// সার্ভারকে সচল রাখতে প্রতি ৪ মিনিটে (২৪০০০০ মিলিমেকেন্ড) একবার অটোমেটিক ব্যাকগ্রাউন্ড পিং করবে
+setInterval(wakeUpRenderEngine, 240000);
+
+
 async function handleDownload() {
     const urlInput = document.getElementById('urlInput');
     const url = urlInput.value.trim();
@@ -334,13 +359,10 @@ async function handleDownload() {
     logEvent(`Initiating processing request for URL: ${url}`);
 
     try {
-        // আপনার নতুন Render API-তে GET রিকোয়েস্ট পাঠানো হচ্ছে
         const targetUrl = `${API_URL}?url=${encodeURIComponent(url)}`;
         const response = await fetch(targetUrl, {
             method: 'GET',
-            headers: {
-                'Accept': 'application/json'
-            }
+            headers: { 'Accept': 'application/json' }
         });
 
         const data = await response.json();
@@ -349,7 +371,6 @@ async function handleDownload() {
             showToast("Success! Video ready.");
             logEvent(`Successfully fetched asset from Render API stream source.`);
             
-            // রিলিজ ডেটা ইন্টারফেসে যোগ করা হচ্ছে
             addRecentItem(url, data.download_link, data.title, data.platform);
             urlInput.value = "";
         } else {
