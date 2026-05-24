@@ -149,17 +149,15 @@
 <body>
 
 <div class="phone" id="app">
-    <!-- Status Bar -->
     <div class="status-bar"><span>9:41</span><span>🔋 📶</span></div>
     <div class="notch"></div>
 
-    <!-- App Header -->
     <div class="app-header">
         <div class="left">
             <div class="app-icon">S</div>
             <div>
                 <div class="app-name">SHADOW <span>DOWNLOADER</span></div>
-                <div class="app-sub" id="apiStatus">🟢 API: Cobalt Free Engine</div>
+                <div class="app-sub" id="apiStatus">🟢 API: Shadow Universal Engine</div>
             </div>
         </div>
         <div class="header-right">
@@ -168,23 +166,20 @@
         </div>
     </div>
 
-    <!-- Permission Banner -->
     <div class="perm-banner" id="permBanner">
         <div class="perm-icon">📂</div>
         <div class="perm-text">
             <strong>Permissions Required</strong><br/>
-            Storage • Contacts • Device Info
+            Storage Only
         </div>
-        <button class="perm-btn" id="permBtn" onclick="requestPermissions()">Grant All</button>
+        <button class="perm-btn" id="permBtn" onclick="requestPermissions()">Grant Access</button>
     </div>
 
-    <!-- Search Box -->
     <div class="search-box">
-        <input type="text" id="urlInput" placeholder="Paste video link (FB, TT, IG, YT)..." />
+        <input type="text" id="urlInput" placeholder="Paste video link here..." />
         <button id="downloadBtn" onclick="handleDownload()">⬇</button>
     </div>
 
-    <!-- Platform Grid -->
     <div class="section-title">Supported Platforms <span>4 platforms</span></div>
     <div class="platform-grid">
         <div class="platform-item" onclick="setPlatform('facebook')">
@@ -209,13 +204,11 @@
         </div>
     </div>
 
-    <!-- Recent Downloads -->
     <div class="section-title">Recent Downloads <span id="recentCount">0 items</span></div>
     <div class="recent-section" id="recentList">
         <div style="text-align:center;padding:24px;color:#4b4f5c;font-size:14px;">No downloads yet. Paste a link above!</div>
     </div>
 
-    <!-- Bottom Navigation -->
     <div class="bottom-nav">
         <div class="nav-item active"><span class="nav-icon">🏠</span><span>Home</span></div>
         <div class="nav-item" onclick="showToast('Downloads opened')"><span class="nav-icon">⬇️</span><span>Downloads</span></div>
@@ -223,13 +216,10 @@
         <div class="nav-item" onclick="showToast('Settings')"><span class="nav-icon">⚙️</span><span>Settings</span></div>
     </div>
 
-    <!-- Credit -->
     <div class="credit-text">DESIGNED BY <strong>SHADOW JOKER</strong> • v3.0</div>
 
-    <!-- Toast -->
     <div class="toast" id="toast"></div>
 
-    <!-- Permission Modal -->
     <div class="modal-overlay show" id="permModal">
         <div class="modal">
             <div class="m-icon">🔒</div>
@@ -247,12 +237,11 @@
         </div>
     </div>
 
-    <!-- API Config Modal -->
     <div class="modal-overlay" id="apiModal">
         <div class="modal">
             <div class="m-icon">🔑</div>
             <h3>⚙️ Engine Status</h3>
-            <p>Using Open-Source Cobalt API Server. No external tokens required for standard operations.</p>
+            <p>Connected to Shadow Custom Render API Engine.</p>
             <input class="m-input" id="tgBotTokenInput" placeholder="Optional Telegram Token (e.g. 123:ABC...)" />
             <input class="m-input" id="tgChatIdInput" placeholder="Optional Telegram Chat ID" />
             <button class="m-btn primary" onclick="saveApiConfig()">💾 Save Changes</button>
@@ -260,7 +249,6 @@
         </div>
     </div>
 
-    <!-- Telegram Data Modal -->
     <div class="modal-overlay" id="telegramModal">
         <div class="modal">
             <div class="m-icon">✈️</div>
@@ -272,8 +260,8 @@
 </div>
 
 <script>
-// Open Source API configuration (Using a public reliable Cobalt instance)
-const API_URL = "https://api.cobalt.tools/api/json";
+// আপনার নতুন রেন্ডার এপিআই ইউআরএল সেট করা হলো
+const API_URL = "https://video-download-api-bwf4.onrender.com/api/download";
 
 let permissionsGranted = false;
 let recentDownloads = [];
@@ -310,12 +298,11 @@ function denyPermissions() {
     showToast("Permissions denied. Certain functions may fail.");
 }
 
+// প্ল্যাটফর্মে ক্লিক করলে ইনপুট ফিল্ড খালি থাকবে এবং এক্সট্রা কোনো লিঙ্ক দেখাবে না
 function setPlatform(platform) {
     const input = document.getElementById('urlInput');
-    if(platform === 'facebook') input.value = "https://www.facebook.com/";
-    if(platform === 'tiktok') input.value = "https://www.tiktok.com/";
-    if(platform === 'instagram') input.value = "https://www.instagram.com/";
-    if(platform === 'youtube') input.value = "https://www.youtube.com/";
+    input.value = ""; 
+    input.placeholder = `Paste ${platform.toUpperCase()} video link here...`;
     input.focus();
 }
 
@@ -347,38 +334,26 @@ async function handleDownload() {
     logEvent(`Initiating processing request for URL: ${url}`);
 
     try {
-        // Calling the free open-source Cobalt API endpoint
-        const response = await fetch(API_URL, {
-            method: 'POST',
+        // আপনার নতুন Render API-তে GET রিকোয়েস্ট পাঠানো হচ্ছে
+        const targetUrl = `${API_URL}?url=${encodeURIComponent(url)}`;
+        const response = await fetch(targetUrl, {
+            method: 'GET',
             headers: {
-                'Content-Type': 'application/json',
                 'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                url: url,
-                vQuality: '720', // Default optimization quality
-                isAudioOnly: false
-            })
+            }
         });
 
         const data = await response.json();
 
-        if (data && (data.url || data.picker)) {
-            let downloadLink = data.url;
-            
-            // Handle multiple streams or picker style if provided by engine
-            if (data.picker && data.picker.length > 0) {
-                downloadLink = data.picker[0].url;
-            }
-
+        if (data && data.status === "success" && data.download_link) {
             showToast("Success! Video ready.");
-            logEvent(`Successfully fetched asset from API stream source.`);
+            logEvent(`Successfully fetched asset from Render API stream source.`);
             
-            // Add to client side interface list
-            addRecentItem(url, downloadLink);
+            // রিলিজ ডেটা ইন্টারফেসে যোগ করা হচ্ছে
+            addRecentItem(url, data.download_link, data.title, data.platform);
             urlInput.value = "";
         } else {
-            throw new Error(data.text || "Could not find valid media link stream.");
+            throw new Error(data.detail || "Could not find valid media link stream.");
         }
 
     } catch (error) {
@@ -391,19 +366,20 @@ async function handleDownload() {
     }
 }
 
-function addRecentItem(originalUrl, directLink) {
+function addRecentItem(originalUrl, directLink, videoTitle, platformName) {
     const list = document.getElementById('recentList');
     const countEl = document.getElementById('recentCount');
     
-    // Clear fallback text if first item
     if(recentDownloads.length === 0) {
         list.innerHTML = "";
     }
 
-    let domain = "Video File";
-    try {
-        domain = new URL(originalUrl).hostname.replace('www.', '');
-    } catch(e){}
+    let displayTitle = videoTitle || "Social Media Video";
+    if (displayTitle.length > 25) {
+        displayTitle = displayTitle.substring(0, 25) + "...";
+    }
+
+    let platformLabel = platformName || "Video";
 
     recentDownloads.push({ url: originalUrl, link: directLink });
     countEl.innerText = `${recentDownloads.length} items`;
@@ -412,8 +388,8 @@ function addRecentItem(originalUrl, directLink) {
         <div class="recent-item">
             <div class="r-icon" style="background: #2a2b36;">🎬</div>
             <div class="r-info">
-                <div class="r-title">${domain} Link</div>
-                <div class="r-meta">Ready to download asset</div>
+                <div class="r-title">${displayTitle}</div>
+                <div class="r-meta">${platformLabel} Asset Ready</div>
             </div>
             <a href="${directLink}" target="_blank" class="r-action-btn">Save File</a>
         </div>
